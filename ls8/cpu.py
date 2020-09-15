@@ -18,23 +18,49 @@ class CPU:
     def load(self, filename):
         """Load a program into memory."""
 
-        address = 0
+        # filename = sys.argv[1]
+        try: 
+            address = 0
+            # count = 0
+
+            with open(filename) as f:
+                for line in f:
+                    comment_split = line.split("#")
+                    n = comment_split[0].strip()
+
+                    if n == '':
+                        continue 
+                    
+                    val = int(n, 2)
+
+                    self.ram[address] = val
+                    # count = count + 1
+
+                    address += 1
+
+        except FileNotFoundError:
+            print(f"{sys.argv[0]}: {filename} not found")
+            sys.exit(2)
+
+
+        self.reg = [0] * 8
 
         # For now, we've just hardcoded a program:
+        # address = 0
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010, # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111, # PRN R0
+        #     0b00000000,
+        #     0b00000001, # HLT
+        # ]
 
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        # for instruction in program:
+        #     self.ram[address] = instruction
+        #     address += 1
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -71,6 +97,7 @@ class CPU:
         LDI = 0b10000010
         PRN = 0b01000111
         HLT = 0b00000001
+        MUL = 0b10100010
 
         running = True
         instruction = 0
@@ -102,6 +129,14 @@ class CPU:
             elif instruction == HLT:
                 print(HLT)
                 running = False
+
+            elif instruction == MUL:
+                print(MUL)
+                reg_a = self.ram_read(self.pc + 1)
+                reg_b = self.ram_read(self.pc + 2)
+
+                self.reg[reg_a] = self.reg[reg_a] * self.reg[reg_b]
+                self.pc += 3
 
     def ram_read(self, MAR):
         return self.ram[MAR]

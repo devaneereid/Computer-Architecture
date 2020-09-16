@@ -14,6 +14,7 @@ class CPU:
         self.reg = [0] * 8 #R0-R7
         self.ram = [0] * 256
         self.pc = 0
+        self.SP = 7
 
     def load(self, filename):
         """Load a program into memory."""
@@ -98,9 +99,12 @@ class CPU:
         PRN = 0b01000111
         HLT = 0b00000001
         MUL = 0b10100010
+        PUSH = 0b01000101 
+        POP = 0b01000110
 
         running = True
         instruction = 0
+        # op_size = 1
 
         while running:
             instruction = self.ram[self.pc]
@@ -109,7 +113,6 @@ class CPU:
             if instruction == LDI:
                 print(LDI)
                 reg_a = self.ram_read(self.pc + 1)
-                print(reg_a)
                 reg_b = self.ram_read(self.pc + 2)
                 print(reg_b)
                 self.reg[reg_a] = reg_b
@@ -133,10 +136,31 @@ class CPU:
             elif instruction == MUL:
                 print(MUL)
                 reg_a = self.ram_read(self.pc + 1)
+                print(reg_a)
                 reg_b = self.ram_read(self.pc + 2)
+                print(reg_b)
 
                 self.reg[reg_a] = self.reg[reg_a] * self.reg[reg_b]
+                print(self.reg[reg_a])
                 self.pc += 3
+
+            elif instruction == PUSH:
+                reg_a = self.ram_read(self.pc + 1)
+                reg_b = self.ram_read(reg_a)
+
+                self.reg[self.SP] -= 1
+                self.ram[self.reg[self.SP]] = reg_b
+
+                self.pc += 2
+
+            elif instruction == POP:
+                reg_a = self.ram_read(self.pc + 1)
+                reg_b = self.ram[self.reg[self.SP]]
+
+                self.reg[reg_a] = reg_b
+                self.reg[self.SP] += 1
+
+                self.pc += 2
 
     def ram_read(self, MAR):
         return self.ram[MAR]
